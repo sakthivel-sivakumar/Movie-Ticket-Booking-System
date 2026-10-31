@@ -35,6 +35,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+// JWT service
+builder.Services.AddScoped<IJwtService, JwtService>();
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
