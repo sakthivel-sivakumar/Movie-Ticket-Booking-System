@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>ae752c39-e1c7-410b-8559-1bc3ea68246b</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <None Include=".github\upgrades\scenarios\nuget-package-upgrade\plan.md" />

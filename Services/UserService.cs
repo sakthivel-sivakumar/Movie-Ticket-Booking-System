@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MovieTicketBooking.Constants;
 using MovieTicketBooking.DTOs.Auth;
 using MovieTicketBooking.Models;
 using MovieTicketBooking.Repositories.Interfaces;
 using MovieTicketBooking.Services.Interfaces;
+using System.Data;
 
 namespace MovieTicketBooking.Services;
 
@@ -24,7 +26,7 @@ public class UserService(
         {
             FullName = dto.FullName,
             Email = email,
-            Role = "Customer"
+            Role = UserRoles.Customer
         };
 
         user.PasswordHash = passwordHasher.HashPassword(
@@ -64,4 +66,32 @@ public class UserService(
 
         return (true, "Login successful.", token);
     }
+
+    public async Task CreateRoleUserAsync(
+    string fullName,
+    string email,
+    string password,
+    string role)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        var existingUser = await repo.GetByEmailAsync(normalizedEmail);
+
+        if (existingUser is not null)
+            throw new InvalidOperationException("Email is already registered.");
+
+        var user = new User
+        {
+            FullName = fullName,
+            Email = normalizedEmail,
+            Role = role
+        };
+
+        user.PasswordHash = passwordHasher.HashPassword(user, password);
+
+        await repo.AddAsync(user);
+        await repo.SaveChangesAsync();
+    }
+
+
 }
