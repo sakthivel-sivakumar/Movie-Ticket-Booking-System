@@ -5,6 +5,8 @@ public interface IBookingRepository
 {
     Task<List<Booking>> GetAllAsync();
     Task<Booking?> GetByIdAsync(int id);
+
+    Task<Booking?> GetByIdForUpdateAsync(int id);
     Task<List<Booking>> GetByShowAsync(int showId);
     Task<Show?> GetShowAsync(int showId);
     Task<List<ShowSeat>> GetShowSeatsAsync(int showId, List<int> seatIds);

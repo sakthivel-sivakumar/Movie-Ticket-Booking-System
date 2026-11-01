@@ -1,3 +1,4 @@
+
 using MovieTicketBooking.DTOs.Bookings;
 using MovieTicketBooking.Models;
 using MovieTicketBooking.Repositories.Interfaces;
@@ -35,20 +36,31 @@ public class BookingService(IBookingRepository repo) : IBookingService
         return [.. (await repo.GetAllAsync()).Select(Map)];
     }
 
-    public async Task<BookingDto?> GetByIdAsync(int id)
+    public async Task<BookingDto?> GetByIdAsync(
+        int id,
+        int? userId)
     {
-        var x = await repo.GetByIdAsync(id);
+        var booking = await repo.GetByIdAsync(id);
 
-        return x is null ? null : Map(x);
+        if (booking is null)
+            return null;
+
+        if (userId.HasValue && booking.UserId != userId.Value)
+            return null;
+
+        return Map(booking);
     }
 
-    public async Task<List<BookingDto>> GetByShowAsync(int id)
+    public async Task<List<BookingDto>> GetByShowAsync(int showId)
     {
-        return [.. (await repo.GetByShowAsync(id)).Select(Map)];
+        return [.. (await repo.GetByShowAsync(showId)).Select(Map)];
     }
 
     public async Task<(BookingDto? Booking, string? Error)> CreateAsync(
-        CreateBookingDto dto)
+        CreateBookingDto dto,
+        int userId,
+        string customerName,
+        string customerEmail)
     {
         if (dto.SeatIds is null || dto.SeatIds.Count == 0)
             return (null, "Choose at least one seat.");
@@ -75,8 +87,9 @@ public class BookingService(IBookingRepository repo) : IBookingService
                 Guid.NewGuid().ToString("N")[..12].ToUpperInvariant(),
 
             ShowId = dto.ShowId,
-            CustomerName = dto.CustomerName,
-            CustomerEmail = dto.CustomerEmail,
+            UserId = userId,
+            CustomerName = customerName,
+            CustomerEmail = customerEmail,
             CustomerPhone = dto.CustomerPhone,
             BookingDate = DateTime.UtcNow,
             TotalAmount = show.TicketPrice * rows.Count,
@@ -87,6 +100,7 @@ public class BookingService(IBookingRepository repo) : IBookingService
                 .. rows.Select(x => new BookingSeat
                 {
                     SeatId = x.SeatId,
+                    Seat = x.Seat,
                     Price = show.TicketPrice
                 })
             ]
@@ -94,15 +108,20 @@ public class BookingService(IBookingRepository repo) : IBookingService
 
         await repo.SaveBookingAsync(booking, rows);
 
-        return (await GetByIdAsync(booking.BookingId), null);
+        return (Map(booking), null);
     }
 
-    public async Task<(bool Success, string? Error)> CancelAsync(int id)
+    public async Task<(bool Success, string? Error)> CancelAsync(
+        int id,
+        int? userId)
     {
-        var booking = await repo.GetByIdAsync(id);
+        var booking = await repo.GetByIdForUpdateAsync(id);
 
         if (booking is null)
             return (false, "Booking not found.");
+
+        if (userId.HasValue && booking.UserId != userId.Value)
+            return (false, "You cannot cancel another customer's booking.");
 
         if (booking.Status == "Cancelled")
             return (false, "Booking is already cancelled.");

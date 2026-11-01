@@ -30,6 +30,12 @@ public class BookingRepository(ApplicationDbContext db) : IBookingRepository
             .FirstOrDefaultAsync(x => x.BookingId == id);
     }
 
+    public Task<Booking?> GetByIdForUpdateAsync(int id)
+    {
+        return Details()
+            .FirstOrDefaultAsync(x => x.BookingId == id);
+    }
+
     public Task<List<Booking>> GetByShowAsync(int showId)
     {
         return Details()

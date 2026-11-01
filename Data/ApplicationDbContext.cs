@@ -115,5 +115,12 @@ public class ApplicationDbContext(
         modelBuilder.Entity<User>()
         .HasIndex(x => x.Email)
         .IsUnique();
+
+        // Booking - User relationship
+        modelBuilder.Entity<Booking>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

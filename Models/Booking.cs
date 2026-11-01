@@ -18,6 +18,11 @@ public class Booking
         get; set;
     }
 
+    public int UserId
+    {
+        get; set;
+    }
+
     [Required]
     [MaxLength(100)]
     public string CustomerName { get; set; } = string.Empty;
@@ -46,6 +51,11 @@ public class Booking
     public string Status { get; set; } = "Confirmed";
 
     public Show? Show
+    {
+        get; set;
+    }
+
+    public User? User
     {
         get; set;
     }
